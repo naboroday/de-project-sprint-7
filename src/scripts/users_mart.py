@@ -24,7 +24,7 @@ def main() -> None:
                 .withColumn("lat", F.regexp_replace('lat',r'[,]',".")) \
                 .withColumn("lng", F.regexp_replace('lat',r'[,]',"."))
 
-    corr_city = event_with_corr_city(event_with_cities(events_path, cities, spark))
+    corr_city = event_with_corr_city(event_with_city(events_path, cities, spark))
     
     users_mart = actial_geo(corr_city) \
                     .join(home_geo(travel_geo(corr_city)), ["user_id"]) \
