@@ -18,7 +18,7 @@ def main():
                     .appName("s7_project") \
                     .getOrCreate()
 
-    friends_recommendations(event_with_corr_city(event_with_cities(events_path, cities_path, spark))).write.parquet(target_path)
+    friends_recommendations(event_with_corr_city(event_with_city(events_path, cities_path, spark))).write.parquet(target_path)
 
 def event_with_city(path_event_prqt: str, path_city_data: str, spark: pyspark.sql.SparkSession) -> pyspark.sql.DataFrame:
     events_geo = spark.read.parquet(path_event_prqt) \
