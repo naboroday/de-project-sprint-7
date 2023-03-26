@@ -27,7 +27,7 @@ users_mart = SparkSubmitOperator(
     dag=dag_spark,
     application ='/lessons/users_mart.py' ,
     conn_id= 'yarn_spark',
-    application_args = ["/user/master/data/geo/events", "/user/naboroday/project_7/geo.csv"],
+    application_args = ["/user/master/data/geo/events", "/user/naboroday/project_7/timezone/geo_2.csv"],
     conf={
         "spark.driver.maxResultSize": "20g"
     },
@@ -53,7 +53,7 @@ friends_rec_mart = SparkSubmitOperator(
     dag=dag_spark,
     application ='/lessons/friends_rec_mart.py' ,
     conn_id= 'yarn_spark',
-    application_args = ["/user/master/data/geo/events", "/user/naboroday/project_7/geo.csv"],
+    application_args = ["/user/master/data/geo/events", "/user/naboroday/project_7/timezone/geo_2.csv"],
     conf={
         "spark.driver.maxResultSize": "20g"
     },
