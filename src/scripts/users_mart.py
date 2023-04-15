@@ -82,15 +82,16 @@ def actial_geo(df_city: pyspark.sql.DataFrame, spark: pyspark.sql.SparkSession) 
 
 def travel_geo(df_city: pyspark.sql.DataFrame, spark: pyspark.sql.SparkSession) -> pyspark.sql.DataFrame:
  
-    window = Window().partitionBy('event.message_from', 'id').orderBy(F.col('date'))
+    window = Window().partitionBy("user_id").orderBy("date")
  
     df_travel = df_city \
-        .withColumn("dense_rank", F.dense_rank().over(window)) \
-        .withColumn("date_diff", F.datediff(F.col('date').cast(DateType()), F.to_date(F.col("dense_rank").cast("string"), 'dd'))) \
-        .selectExpr('date_diff', 'event.message_from as user', 'date', "id" ) \
-        .groupBy("user", "date_diff", "id") \
-        .agg(F.countDistinct(F.col('date')).alias('cnt_city'))
- 
+        .withColumn("prev_city", F.lag("city").over(window)) \
+        .withColumn("date_diff", F.datediff(F.col('date').cast(DateType()), F.lead("date").over(window), 'dd'))) \
+        .withColumn("new_visit", F.expr("CASE WHEN city = prev_city THEN False ELSE True END")) \
+        .drop("prev_city") \
+        .where("new_visit = True") \
+        .select("user_id", "city", "date_diff")
+    
     return df_travel
 
 # home_city
