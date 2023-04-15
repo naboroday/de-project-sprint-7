@@ -90,7 +90,7 @@ def travel_geo(df_city: pyspark.sql.DataFrame, spark: pyspark.sql.SparkSession) 
         .withColumn("new_visit", F.expr("CASE WHEN city = prev_city THEN False ELSE True END")) \
         .drop("prev_city") \
         .where("new_visit = True") \
-        .select("user_id", "city", "date_diff")
+        .select("user_id", "city","prev_city", "date_diff")
     
     return df_travel
 
@@ -99,7 +99,7 @@ def home_geo(df_travel: pyspark.sql.DataFrame, spark: pyspark.sql.SparkSession) 
  
     df_home = df_travel \
     .withColumn('max_dt', F.max(F.col('date_diff')) \
-                .over(Window().partitionBy('user')))\
+                .over(Window().partitionBy('user_id')))\
     .filter((F.col('cnt_city')>27) & (F.col('date_diff') == F.col('max_dt'))) \
     .persist()
  
