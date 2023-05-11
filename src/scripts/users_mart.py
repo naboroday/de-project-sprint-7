@@ -80,19 +80,19 @@ def actial_geo(df_city: pyspark.sql.DataFrame, spark: pyspark.sql.SparkSession) 
  
     return df_actual
 
+
 def travel_geo(df_city: pyspark.sql.DataFrame, spark: pyspark.sql.SparkSession) -> pyspark.sql.DataFrame:
- 
     window = Window().partitionBy("user_id").orderBy("date")
- 
-    df_travel = df_city \
-        .withColumn("prev_city", F.lag("city").over(window)) \
-        .withColumn("date_diff", F.datediff(F.col('date').cast(DateType()), F.lead("date").over(window), 'dd'))) \
-        .withColumn("new_visit", F.expr("CASE WHEN city = prev_city THEN False ELSE True END")) \
-        .drop("prev_city") \
-        .where("new_visit = True") \
-        .select("user_id", "city","prev_city", "date_diff")
-    
-    return df_travel
+
+    df_city = df_city.withColumn("prev_city", lag("city").over(window))
+
+    df_city = df_city.withColumn("new_visit", expr("CASE WHEN city = prev_city THEN False ELSE True END"))
+    df_city = df_city.where("new_visit = True")
+    df_city = df_city.withColumn("prev_date", lag("date").over(window))
+    df_city = df_city.withColumn("days_spent", when(col("prev_date").isNull(), 0).otherwise(datediff(col("date"), col("prev_date"))))
+    df_city = df_city.groupBy("user_id", "city").agg({"days_spent": "sum"})
+
+    return df_city
 
 # home_city
 def home_geo(df_travel: pyspark.sql.DataFrame, spark: pyspark.sql.SparkSession) -> pyspark.sql.DataFrame:
